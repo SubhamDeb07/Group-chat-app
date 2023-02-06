@@ -9,7 +9,14 @@ const sequelize = require('./util/database')
 
 
 const userRoute = require('./Routes/userRoute')
-console.log(userRoute)
+const chatRouter = require('./Routes/chatRoute')
+
+
+
+const User = require('./Models/User')
+const Chat = require('./Models/Chatting')
+
+
 
 
 const cors = require('cors')
@@ -21,6 +28,7 @@ app.use(cors())
 
 
 app.use(userRoute)
+app.use(chatRouter)
 
 
 app.use((req,res)=>{
@@ -28,7 +36,8 @@ app.use((req,res)=>{
 })
 
 
-
+User.hasMany(Chat);
+Chat.belongsTo(User);
 
 
 
