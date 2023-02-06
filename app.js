@@ -13,7 +13,7 @@ const chatRouter = require('./Routes/chatRoute')
 
 
 
-const User = require('./Models/User')
+const Users = require('./Models/User')
 const Chat = require('./Models/Chatting')
 
 
@@ -36,8 +36,8 @@ app.use((req,res)=>{
 })
 
 
-User.hasMany(Chat);
-Chat.belongsTo(User);
+Users.hasMany(Chat);
+Chat.belongsTo(Users);
 
 
 

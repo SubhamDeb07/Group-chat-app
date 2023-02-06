@@ -1,7 +1,9 @@
 
+const { Model } = require('sequelize');
 const Chat = require('../Models/Chatting')
 
-const User = require('../Models/User');
+const Users = require('../Models/User');
+const sequelize = require('sequelize')
 
 
 
@@ -13,13 +15,12 @@ exports.postMessage = async(req,res,next)=>{
         return res.status(400).json({message:'nothing entered'})
       }
       else{
-        const findName = await User.findAll({where: {username}})
-        console.log('----------', findName)
         const data = await Chat.create({
           message:message,
-          username: findName,
-          UserId: req.user.id
+          UserId: req.user.id,
+          username: req.user.username
         })
+        
   
         res.status(200).json({message: data})
   
@@ -37,10 +38,17 @@ exports.postMessage = async(req,res,next)=>{
 
   exports.getMessage = async(req,res,next)=>{
      try{
+     const data = await Chat.findAll({
+      include: [
+        {
+        model: Users,
+        as: 'User'
+
+
+        }]
       
-     const data =  await Chat.findAll()
-     
-     res.status(201).json(data);
+     }) 
+    res.status(201).json(data);
     }
     catch(error) {
       console.log(error);
