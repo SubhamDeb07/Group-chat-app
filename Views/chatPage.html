@@ -11,6 +11,10 @@
         <input type="text" name="message" placeholder="Type something ...." autocomplete="off">
         <input type="submit" value="send" >
     </form>
+    <div class="chat-container-div">  
+        <div class="msg-div">
+        </div>
+    </div>
     
 </body>
 </html>
@@ -30,44 +34,109 @@
          axios.post("http://localhost:3000/users/addChats", obj, {headers:{"Authorization" : token}})
         .then((response)=>{
             console.log(response);
-            DisplayOnScreen(response.data.message)
+            if(response.status === 200){
+                        console.log(response.data);
+                        
+                        event.target.message.value ='';
+                        //showOnScreen(message);
+                        let name = localStorage.getItem('name');
+                        saveToLocal(response.data.data, name);
+
+                    }
         }).catch(err=>console.log(err));
    
     }
 
 
-   async function getChats(event){
+    window.addEventListener('DOMContentLoaded', async (event) =>{
+        event.preventDefault();
         const token = localStorage.getItem('token');
+        let lastId;
+
+     const msg = JSON.parse(localStorage.getItem('msg')); //converts into obj
+
+if(msg == undefined || msg.length == 0){
+  lastId =0;
+}
+else{
+  lastId = msg[msg.length-1].id;
+}
+
+
         
-       await axios.get("http://localhost:3000/users/getChats", {headers:{"Authorization" : token}})
+        await axios.get(`http://localhost:3000/users/getChats?msg=${lastId}`, {headers:{"Authorization" : token}})
         .then((response)=>{
                 console.log(response)
-                for(i=0;i<response.data.length;i++){
-                    DisplayOnScreen(response.data[i])
+              
+                var newArr = response.data.messagestosend;
+                saveToLocal(newArr , response.data.username);
+                if(response.status === 200){
+                 showChatsOnScreen(response.data, response.data.username);
                 }
             })
             .catch((err)=>{
                 console.log(err)
             })
-   }
+        })
 
 
-    function DisplayOnScreen(user){
-            const parentNode = document.getElementById("Chats")
-            const childNode = `<li id=${user.id}>${user.username}- ${user.message}</li>`
-            parentNode.innerHTML = parentNode.innerHTML + childNode
+    // function DisplayOnScreen(user){
+    //         const parentNode = document.getElementById("Chats")
+    //         const childNode = `<li id=${user.id}>${user.username}- ${user.message}</li>`
+    //         parentNode.innerHTML = parentNode.innerHTML + childNode
         
-        }
+    //     }
 
-    
-let interValid = setInterval(getChats, 5000)
-if(interValid){
-    clearInterval(interValid)
+        function saveToLocal(arr,name){
+
+let chatArray = [];
+let oldMessages = JSON.parse(localStorage.getItem('msg'));
+
+if(oldMessages == undefined || oldMessages.length ==0){
+  chatArray = chatArray.concat(arr)
 }
-    
+else{
+  chatArray = [];
+  chatArray = chatArray.concat(oldMessages,arr);
+}
+
+localStorage.setItem('msg' , JSON.stringify(chatArray))
+console.log((JSON.parse(localStorage.getItem('msg'))).length)
+showChatsOnScreen(name);
 
 
-window.addEventListener('DOMContentLoaded', getChats())
+}
+function showChatsOnScreen(name){
+              console.log('inside show on scree: '+ name);
+              localStorage.setItem('name', name)
+
+              let chatArray = localStorage.getItem('msg')
+              console.log(chatArray);
+              let newChatArray =  JSON.parse(chatArray)
+              let chatContainer = document.querySelector('.chat-container-div')
+
+
+              newChatArray.forEach(chat => {
+                let child = `<div class= "message-div" >
+                              <div class= "resize-sent">
+                                  <div class= "sent" id=${chat.id}>
+                                    <p class="sent-name">${chat.username}</p>
+                                    <p class="sent-msg">${chat.message}</p>
+                                    
+                                  
+                                    </div>
+                              </div>
+                           </div>
+                              `
+                  chatContainer.innerHTML += child;
+                
+              });
+            }
+
+        
+
+
+
 
 
 

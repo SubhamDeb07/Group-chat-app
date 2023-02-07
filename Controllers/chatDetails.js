@@ -37,18 +37,19 @@ exports.postMessage = async(req,res,next)=>{
   }
 
   exports.getMessage = async(req,res,next)=>{
+    let msgId = req.query.msg;
      try{
-     const data = await Chat.findAll({
-      include: [
-        {
-        model: Users,
-        as: 'User'
+     const data = await Chat.findAll() 
+     console.log(data.length)
+     let index = data.findIndex(chat => chat.id == msgId)
 
-
-        }]
-      
-     }) 
-    res.status(201).json(data);
+     let messagestosend = data.slice(index+1);
+ 
+ 
+ 
+ 
+    
+    res.status(200).json({messagestosend});
     }
     catch(error) {
       console.log(error);
