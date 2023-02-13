@@ -1,89 +1,73 @@
-const bcrypt = require('bcrypt')
-const User = require('../Models/User')
-const jwt = require('jsonwebtoken')
+const bcrypt=require('bcrypt');
+const jwt=require('jsonwebtoken');
+const User=require('../Models/User');
+function isstringinvalid(string){
+    if(string==undefined || string.length==0){
+        return true
+    }else{
+        return false
+    }
+}
+function generateAccessToken(id,name){
+    return jwt.sign({userId:id,name:name},'secretkeyorbigggervalue')
 
+}
 
-
-exports.signUp = async(req, res, next)=>{
-    console.log('Ready To Signup')
-
+exports.postSignUp = async(req,res,next)=>{
     try{
-        const username = req.body.username;
-        const email = req.body.email;
-        const password = req.body.password
-        const Number = req.body.Number
+    console.log(req.body)
+    
+    const {name,email,phonenumber,password} = req.body
+   
+    if(isstringinvalid(name) || isstringinvalid(email) || isstringinvalid(phonenumber)|| isstringinvalid(password)){
+        return res.status(401).json({message:'please fill up all the details'})
+    }
+    const user=await User.findOne({where:{email:email}})
+    if(user){
+        return res.status(400).json({message:'user alredy exists >>>please try Login'})
+    }
+    const saltrounds=10
+    bcrypt.hash(password,saltrounds,async(err,hash)=>{
+        if(err){
+            throw new Error(err)
+        }
+       
+      
+        await User.create({name,email,phonenumber,password:hash})
+        res.status(201).json({message:'succesfully create new user'})
+    })
+  
+}
+    catch(err){
+      res.status(500).json({message:'something went wrong'})
+    }
+}
 
-        const user = await User.findAll({where:{email}});
+exports.postLogin=async(req,res,next)=>{
+    try{
+    const{email,password}=req.body;
+    console.log(password)
+    if(isstringinvalid(email) || isstringinvalid(password)){
+       return res.status(401).json({message:'email or password is missing',success:false})
+    }
+    const user=await User.findAll({where:{email}})
         if(user.length>0){
-            return res.status(207).json({message:'user already exist'})
-        }
-      else{
-        bcrypt.hash(password, 10, async(err, hash)=>{
-            const data = await User.create({
-                username,
-                email,
-                password:hash,
-                Number
+            bcrypt.compare(password,user[0].password,(err,result)=>{
+                if(err){
+                    throw new Error('something went wrong')
+                }
+                if(result===true){
+                    res.status(200).json({success:true,message:'user logged in successfully',token:generateAccessToken(user[0].id,user[0].name)})
+                }else{
+                    return res.status(400).json({success:false,message:'Password Is Incorrect'})
+                }
             })
-            return res.status(201).json({newUserDetails: data})
-        
-        })
-    }
-    }
-    
-    
-    catch(error){
-        console.log(error)
-        res.status(500).json({error: error})
-    }
-    
-}
 
-
-function generateToken(id, username){
-    return jwt.sign({UserId: id, username: username}, 'HiToken!')
-}
-
-
-exports.loginUser = async(req, res, next)=>{
-    try{
-        const {email, password} = req.body
-        const user = await User.findAll({where:{email}})
-        
-        if(user.length > 0){
-            bcrypt.compare(password, user[0].password, (err, match)=>{
-            if(match){
-                return res.status(201).json({message: 'Login Successful!', token: generateToken(user[0].id, user[0].username)})
-            }
-            else{
-                return res.status(400).json({message: 'wrong password'})
-            }
-        })
+        }else{
+            return res.status(404).json({success:false,message:'User does not exist'})
         }
- 
-        else{
-            return res.status(207).json({message: 'User not found'})
-        }
-    }
-    catch(error){
-        console.log(error)
-        res.status(500).json({error: error})
-    }
+    
+   } catch{err=>{
+        res.status(500).json({message:err,success:false})
+    }}
 }
-
-
-
-
-
-exports.getUsers = async(req, res, next)=>{
-    console.log('Getting Users');
-    try{
-        const SignedUser = await User.findAll()
-        res.status(201).json(data)
-    }
-    catch(error){
-        console.log(error)
-        res.status(500).json({error: error})
-    }
-}
-

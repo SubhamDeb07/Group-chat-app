@@ -1,28 +1,18 @@
-const jwt = require('jsonwebtoken')
-const User = require('../Models/User')
-require('dotenv').config()
-
-const authentication = (req, res, next)=>{
-    try{
-        const token = req.header('Authorization')
+const jwt=require('jsonwebtoken');
+const User = require('../Models/User');
+const auth=(req,res,next) =>{
+        const token=req.header('Authorization');
         console.log(token)
-        const user = jwt.verify(token, 'HiToken!')
-        console.log('UserId>>>>>', user.UserId)
-
-        User.findByPk(user.UserId).then(user=>{
-            console.log('user>>>>', user)
-            console.log(JSON.stringify(user))
-            req.user = user
-            next()
-        })
-        .catch(err=>{
-            console.log(err)
-        })
-    }
-    catch(error){
-        console.log(error)
-        return res.status(401).json({success: false})
-    }
+        const user=jwt.verify(token,'secretkeyorbigggervalue')
+        console.log(user.userId)
+        User.findByPk(user.userId).then((user=>{   
+            req.user=user;
+            console.log(req.user)
+            next();
+        }))
+        
+    .catch(err=>{
+        return res.status(500).json({success:false})
+    })  
 }
-
-module.exports = {authentication}
+module.exports=auth;

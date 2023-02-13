@@ -10,11 +10,15 @@ const sequelize = require('./util/database')
 
 const userRoute = require('./Routes/userRoute')
 const chatRouter = require('./Routes/chatRoute')
+const GroupRoute = require('./Routes/groupRoutes')
 
 
 
 const Users = require('./Models/User')
 const Chat = require('./Models/Chatting')
+const Groups = require('./Models/groups')
+const UserGroup = require('./Models/userGroup')
+const groupChat = require('./Models/groupChat')
 
 
 
@@ -29,6 +33,8 @@ app.use(cors())
 
 app.use(userRoute)
 app.use(chatRouter)
+app.use(GroupRoute)
+
 
 
 app.use((req,res)=>{
@@ -38,6 +44,10 @@ app.use((req,res)=>{
 
 Users.hasMany(Chat);
 Chat.belongsTo(Users);
+Users.hasMany(groupChat);
+groupChat.belongsTo(Users)
+Users.belongsToMany(Groups , {through: UserGroup} )
+Groups.belongsToMany(Users , {through: UserGroup} )
 
 
 

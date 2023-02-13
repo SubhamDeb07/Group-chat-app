@@ -1,58 +1,64 @@
+const {Op} =require('sequelize');
+const User=require('../Models/User');
+const Chat=require('../Models/Chatting');
 
-const { Model } = require('sequelize');
-const Chat = require('../Models/Chatting')
-
-const Users = require('../Models/User');
-const sequelize = require('sequelize')
-
-
-
-exports.postMessage = async(req,res,next)=>{
-    const{message} = req.body;
-
+exports.getAllusers=async(req,res)=>{
     try{
-      if(!message){
-        return res.status(400).json({message:'nothing entered'})
-      }
-      else{
-        const data = await Chat.create({
-          message:message,
-          UserId: req.user.id,
-          username: req.user.username
+    const user =await User.findAll({where:{id:{[Op.ne]: +req.user.id}},
+        attributes:['id','name']
+    })
+    res.status(200).json({user,success:true})
+}catch(err){
+    res.status(500).json({message:err,success:false})
+}
+}
+exports.postChatMessage=async(req,res)=>{
+    try{
+        console.log(req.body)
+        const chat= req.body.chat;
+        const id=req.body.toUser;
+        if(!chat){
+            return res.status(400).json({message:'please enter the message'})
+        }
+        await req.user.createChat({chatMessage:chat,toUser:id}).then(()=>{
+            console.log(req.user.name)
+            res.status(200).json({UserName:req.user.name,message:'message sent successfully'})
+
         })
-        
-  
-        res.status(200).json({message: data})
-  
-      }
+    }catch(err){
+        res.status(500).json({message:'internal server error',success:false})
+    }   
     
-    
-  
+}
+exports.getAllChats=async(req,res)=>{
+    try{
+    const chatpersonId = +req.params.chatpersonId;
+    console.log('asadsfgdsasfaf',chatpersonId)
+    if(chatpersonId ==0){
+        return res.status(200).json({message:'successful'})
     }
-  
-    catch(error){
-      res.status(500).json(error);
-    }
-  
-  }
+    console.log(chatpersonId)
+    const chatTwoWay=await Chat.findAll({
+        limit:10,
+        order:[["updatedAt","DESC"]],
+        where:{
+            [Op.or]:[
+                {toUser:chatpersonId,userId:+req.user.id},
+                {toUser:+req.user.id,userId:chatpersonId}
+            ]
+        },
+        attributes:['chatMessage'],
+        include:{
+            model:User,
+            where:{
+                [Op.or]:[{id:+req.user.id},{id:chatpersonId}]
+            },
+            attributes:['name']
+        }
 
-  exports.getMessage = async(req,res,next)=>{
-    let msgId = req.query.msg;
-     try{
-     const data = await Chat.findAll() 
-     console.log(data.length)
-     let index = data.findIndex(chat => chat.id == msgId)
-
-     let messagestosend = data.slice(index+1);
- 
- 
- 
- 
-    
-    res.status(200).json({messagestosend});
+    })
+        res.status(200).json({chats:chatTwoWay.reverse(),success:true})
+}catch(err){
+    res.status(500).json({message:'internal server error',success:false})
+}
     }
-    catch(error) {
-      console.log(error);
-      res.status(500).json({error:error});
-    }
-  }
