@@ -4,51 +4,57 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
     <link rel="stylesheet" href="./public/groupChat.css">
     <title>Document</title>
     
 </head>
 <body>
-    <nav>
-        
-        <img class="logo"src="../img/chat.png" >
-        <h2>Chat App</h2>
-        <h2>Group Chat</h2>
-    </nav>
+
     <div class="container">
-        <div>
-            <nav>
-            <button class="btn" id="one-to-one-chat">Private Chat</button>
-            <button class="btn" id="group-chat">Group Chat</button>
-            <button class="btn" id="create-group">Create Group</button>
-        </nav>
-        <div >
-            <ul  id="left">
-
-
-            </ul>
-       
-        
-            <ul id="users-list">
-
-            </ul>
+        <header class="chat-header">
+            <h1><i class="fas fa-smile"></i> ChatCord</h1>
+            <h2>Group Chat</h2>
+            <a id="leave-btn" class="btn2">Leave Room</a>
+          </header>
+        <div class="container1">
+            <div  class="features">
+                <nav>
+                <button class="btn" id="one-to-one-chat">Private Chat</button>
+                <button class="btn" id="group-chat">Group Chat</button>
+                <button class="btn" id="create-group">Group settings</button>
+            </nav>
+            <div >
+                <ul  id="left">
+    
+    
+                </ul>
+           
+            
+                <ul id="users-list">
+    
+                </ul>
+            </div>
         </div>
-    </div>
-    <div class="card-header" id="message-card-header">
-                  <!-- Message to : <span></span> -->
-                </div>
-    <ul id="chat-messages">
+        </div>
+        <div class="container2">
+            <div class="card-header" id="message-card-header">
+              </div>
+  <ul id="chat-messages">
 
-    </ul>
-    <div id="toast-msg"></div>
-        <!-- <div class="message left" id="right">rahul:i am fine</div> -->
-    </div>
+  </ul>
+  <div id="toast-msg"></div>
+  </div>
+        
+     
+
     <div class="send">
         <form id="send-container" onsubmit="chat(event)">
              <input type="text" name="group2" id="messageinp" placeholder="Enter Message">
-             <button class="btn" type="submit" >Send</button>
+             <button class="btn3" type="submit" >Send</button>
         </form>
     </div>
+</div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.2.2/axios.min.js" integrity="sha512-QTnb9BQkG4fBYIt9JGvYmxPpd6TBeKp6lsUrtiVQsrJ9sb33Bn9s0wMQO9qVBFbPX3xHRAsBHvXlcsrnJjExjg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
         const userLeft = document.getElementById('left')
@@ -108,7 +114,7 @@ function userClick(e){
         const name = e.target.textContent;
         const id = +e.target.children[0].value;
         groupId=id;
-        const userMessage = `Message to Group: ${name} <input type='hidden' id='msg-header-user-id' value='${id}'/>`;
+        const userMessage = `<h1 style="text-align:center; bottom:10px">${name} <input type='hidden' id='msg-header-user-id' value='${id}'/></h1>`;
         console.log(userMessage)
         messageHeader.innerHTML=userMessage;
         groupMessage.innerHTML="";
@@ -125,7 +131,7 @@ async function  getGroupMessages(groupId =0){
       const chats=response.data.groupMessages;
       chats.forEach((group)=>{
         console.log(group)
-        const chatNodes=`<li class="list-group-item1">${group.userName}:${group.groupMessage}</li>`
+        const chatNodes=`<li class="list-group-item1"><strong style="color:white">${group.userName}</strong><br>${group.groupMessage}</li>`
         groupMessage.innerHTML +=chatNodes
       })
    }
@@ -163,13 +169,19 @@ async function chat(e){
 }
 function showScreen(){
     allLoginUsers()
-    setInterval(()=>{
     getGroupMessages(groupId)
-    },5000)
     }
 
 window.addEventListener('DOMContentLoaded',showScreen)
 userLeft.addEventListener('click',userClick)
+
+document.getElementById('leave-btn').addEventListener('click', () => {
+  const leaveRoom = confirm('Are you sure you want to leave the chatroom?');
+  if (leaveRoom) {
+    window.location = './login.html';
+  } else {
+  }
+});
     </script>
 </body>
 </html>

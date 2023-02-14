@@ -4,21 +4,25 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./public/chat.css">
     <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+    <link rel="stylesheet" href="./public/chat.css">
 </head>
 <body>
-    <nav>
-        
-        <h2>Chat App</h2>
-        <h2>Private Chat</h2>
-    </nav>
     <div class="container">
-        <div>
+        <header class="chat-header">
+            <h1><i class="fas fa-smile"></i> ChatCord</h1>
+            <h2>Private Chat</h2>
+            <a id="leave-btn" class="btn2">Leave Room</a>
+          </header>
+      
+    <div class="container1">
+        <div class="features">
             <nav>
             <button class="btn" id="one-to-one-chat">Private Chat</button>
             <button class="btn" id="group-chat">Group Chat</button>
-            <button class="btn" id="create-group">Create Group</button>
+            <button class="btn" id="create-group">Group settings</button>
         </nav>
         <div >
             <ul  id="left">
@@ -32,24 +36,28 @@
             </ul>
         </div>
     </div>
-    <div class="card-header" id="message-card-header">
-                </div>
-    <ul id="chat-messages">
-
-    </ul>
-    <div id="toast-msg"></div>
     </div>
-    <div class="chat-messages">
-        <div class="message">
+    <div class="container2">
+        <div class="card-header" id="message-card-header">
+
         </div>
+<ul id="chat-messages">
+
+</ul>
+<div id="toast-msg"></div>
 </div>
 
-    <div class="send">
-        <form id="send-container" onsubmit="chat(event)">
-             <input type="text" name="chat2" id="messageinp" placeholder="Enter Message">
-             <button class="btn" type="submit" >Send</button>
-        </form>
+
+<div class="send">
+<form id="send-container" onsubmit="chat(event)">
+     <input type="text" name="chat2" id="messageinp" placeholder="Enter Message">
+     <button class="btn3" type="submit" >Send</button>
+</form>
+</div>
     </div>
+  
+   
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.2.2/axios.min.js" integrity="sha512-QTnb9BQkG4fBYIt9JGvYmxPpd6TBeKp6lsUrtiVQsrJ9sb33Bn9s0wMQO9qVBFbPX3xHRAsBHvXlcsrnJjExjg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
         const userLeft = document.getElementById('left')
@@ -62,7 +70,7 @@ const creategroup=document.getElementById('create-group')
 
 groupChat.addEventListener('click',groupTalk)
 function groupTalk(){
-    // console.log('true')
+
     window.location.href="./groupChat.html"
 }
 
@@ -108,62 +116,36 @@ async function allLoginUsers(){
 
 
 
-
-function userClick(event){
-    if(event.target.className == "list-group-item"){
-        console.log(event.target)
-        console.log(event.target.textContent)
-        console.log(event.target.children[0].value)
-        const name = event.target.textContent;
-        const id = +event.target.children[0].value;
+function userClick(e){
+    if(e.target.className == "list-group-item"){
+        const name = e.target.textContent;
+        const id = +e.target.children[0].value;
         toUserId:id;
-        const userMessage = `Message to : ${name} <input type='hidden' id='msg-header-user-id' value='${id}'>`;
+        const userMessage = `<h1 style="text-align:center; bottom:10px">${name} <input class="msg2" type='hidden' id='msg-header-user-id' value='${id}'/></h1>`;
         messageHeader.innerHTML=userMessage;
         chatMessage.innerHTML="";
         getChats(id);
     }
 }
-
-
-
-
-
-async function  getChats(toUserId = 0){
+async function  getChats(toUserId =0){
     chatMessage.innerHTML="";
     const token=localStorage.getItem('token')
    const response= await axios.get(`http://localhost:3000/chat/allchats/${toUserId}`,{headers:{"Authorization":token}})
 //    console.log(response)
    if(response.status ==200 && response.data.chats){
       const chats=response.data.chats;
+      console.log('responsessss',chats)
       chats.forEach((chat)=>{
         console.log(chat)
-        display(chat)
+        const chatNodes=`<li class="list-group-item1"><strong style="color:white">${chat.user.name}</strong><br>${chat.chatMessage}</li>`
+        chatMessage.innerHTML +=chatNodes
       })
    }
 }
-
-function display(user){
-    const div = document.createElement('div');
-  div.classList.add('message');
-  const p = document.createElement('p');
-  p.classList.add('meta');
-  p.innerText = user.user.name;
-  p.innerHTML += `<span>${user.updatedAt}</span>`;
-  div.appendChild(p);
-  const para = document.createElement('p');
-  para.classList.add('text');
-  para.innerText = user.chatMessage;
-  div.appendChild(para);
-  document.querySelector('.chat-messages').appendChild(div);
-}
-
-
-
-
-async function chat(event){
-    event.preventDefault()
+async function chat(e){
+    e.preventDefault()
     const id1 = +document.getElementById('msg-header-user-id').value;
-    const chat1=event.target.chat2.value;
+    const chat1=e.target.chat2.value;
     if(!chat1){
        return createToast('plzz enter the message')
     }
@@ -172,7 +154,7 @@ async function chat(event){
        chat: chat1,
        toUser:id1
     }
-    console.log('muuuuuu',chatDetails)
+    console.log(chatDetails)
     const token=localStorage.getItem('token')
     await axios.post('http://localhost:3000/chat/chatmessage',chatDetails,{headers:{"Authorization":token}})
     .then(response=>{
@@ -193,12 +175,21 @@ async function chat(event){
 }
 function showScreen(){
     allLoginUsers()
-    getChats()
-    
+
+        getChats(toUserId)
+
     }
 
 window.addEventListener('DOMContentLoaded',showScreen)
 userLeft.addEventListener('click',userClick)
+
+document.getElementById('leave-btn').addEventListener('click', () => {
+  const leaveRoom = confirm('Are you sure you want to leave the chatroom?');
+  if (leaveRoom) {
+    window.location = './login.html';
+  } else {
+  }
+});
     </script>
 </body>
 </html>
