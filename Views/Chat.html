@@ -7,6 +7,7 @@
     <title>Document</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
 
+
     <link rel="stylesheet" href="./public/chat.css">
 </head>
 <body>
@@ -52,6 +53,8 @@
 <form id="send-container" onsubmit="chat(event)">
      <input type="text" name="chat2" id="messageinp" placeholder="Enter Message">
      <button class="btn3" type="submit" >Send</button>
+     <label for="sendAttachment"><i style=" margin: bottom 25px;  height: 50px; background-color: #bc7349; border: 2px solid white; border-color: #bc7349;" class="material-icons btn btn-primary">Attach File</i></label>
+     <input id="sendAttachment" style="visibility:hidden;" type="file">
 </form>
 </div>
     </div>
@@ -83,12 +86,13 @@ function Crategroup(){
 
 
 let toUserId;
-function createToast(msg, color = "red"){
+function createToast(msg, color = "#b8c794"){
     console.log('true')
     const div = document.createElement("div");
     div.innerHTML = msg;
     div.style.backgroundColor = color;
-    div.style.padding = "1rem 2rem";
+    div.style.width ="100px";
+    div.style.padding = "1rem 1rem";
     div.style.borderRadius = "4px";
     div.style.color = "#fff";
     console.log(div.innerText)
@@ -133,6 +137,8 @@ async function  getChats(toUserId =0){
    const response= await axios.get(`http://localhost:3000/chat/allchats/${toUserId}`,{headers:{"Authorization":token}})
 //    console.log(response)
    if(response.status ==200 && response.data.chats){
+    localStorage.removeItem('Id')
+    localStorage.setItem('Id', toUserId )
       const chats=response.data.chats;
       console.log('responsessss',chats)
       chats.forEach((chat)=>{
@@ -173,10 +179,25 @@ async function chat(e){
     }
 }
 }
+
+const fileInput = document.querySelector('#sendAttachment');
+fileInput.addEventListener('change', async () => {
+    const toUserId = document.querySelector('.list-group-item').value;
+    const selectedFile = fileInput.files[0];
+    console.log(selectedFile);
+    await axios.post('/message/saveFile', {
+        file: selectedFile,
+        chatUserId: toUserId
+    })
+})
+
+
 function showScreen(){
     allLoginUsers()
-
-        getChats(toUserId)
+   setInterval(() => {
+    getChats(localStorage.getItem('Id'))
+   }, 1000);
+        
 
     }
 

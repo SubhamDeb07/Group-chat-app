@@ -5,4 +5,6 @@ const chatController=require('../Controllers/chatDetails');
 router.get('/chat/allusers',auth,chatController.getAllusers);
 router.post('/chat/chatmessage',auth,chatController.postChatMessage);
 router.get('/chat/allchats/:chatpersonId',auth,chatController.getAllChats);
+
+router.post('/saveFile', chatController.saveFile);
 module.exports=router;

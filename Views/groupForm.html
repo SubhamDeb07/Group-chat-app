@@ -163,6 +163,7 @@ async function addUserToGroup(e){
     console.log(adduser)
     const token=localStorage.getItem('token')
     const response=await axios.post('http://localhost:3000/group/adduser',adduser,{headers:{"Authorization":token}})
+    alert('Successfully added!')
     console.log(response)
 }catch(err){
     console.log(err)
@@ -178,6 +179,7 @@ async function removeUser(e){
     console.log(removeanyuser)
     const token=localStorage.getItem('token')
     const response = await axios.post('http://localhost:3000/group/deleteuser',removeanyuser,{headers:{"Authorization":token}})
+    alert('Successfully removed!')
     console.log(response)
 }catch(err){
     console.log(err)
